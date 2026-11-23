@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#4f46e5" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>RT 提取器</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header>
+    <div class="titles">
+      <h1>Antigravity RT 提取</h1>
+      <p class="hint">每行一个账号：<code>邮箱----密码----2FA密钥</code>（支持 otpauth:// 链接）</p>
+      <button id="addr" class="addr" title="点击复制访问地址">检测中…</button>
+    </div>
+    <div class="actions">
+      <button id="start" class="primary">开始提取</button>
+      <button id="clear">清空记录</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel">
+      <textarea id="input" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="a@example.com----password----JBSWY3DPEHPK3PXP"></textarea>
+      <div class="meta">
+        <span id="summary">等待输入</span>
+        <span>窗口自动最小化运行</span>
+      </div>
+    </section>
+
+    <section id="cards" class="cards"></section>
+  </main>
+
+  <template id="card">
+    <article class="card">
+      <div class="card-head">
+        <span class="email"></span>
+        <span class="badge"></span>
+      </div>
+      <p class="stage"></p>
+      <div class="rt-row">
+        <input class="rt" readonly placeholder="refresh token" />
+        <button class="copy" hidden>复制</button>
+      </div>
+      <p class="error" hidden></p>
+    </article>
+  </template>
+
+  <script src="/app.js"></script>
+</body>
+</html>

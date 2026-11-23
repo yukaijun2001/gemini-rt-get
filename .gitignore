@@ -1,0 +1,7 @@
+node_modules/
+.env
+recordings/
+profiles/
+data/
+.DS_Store
+npm-debug.log*

@@ -1,0 +1,24 @@
+services:
+  gemini-rt-get:
+    build: .
+    image: gemini-rt-get
+    container_name: gemini-rt-get
+    ports:
+      - "20000:20000"
+    environment:
+      PORT: "20000"
+      TZ: Asia/Shanghai
+      HOST_IP: "${HOST_IP:-}"
+      GOOGLE_CLIENT_ID: "${GOOGLE_CLIENT_ID:-}"
+      GOOGLE_CLIENT_SECRET: "${GOOGLE_CLIENT_SECRET:-}"
+    volumes:
+      - ./profiles:/app/profiles
+      - ./recordings:/app/recordings
+    shm_size: "1gb"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:20000/api/info').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s

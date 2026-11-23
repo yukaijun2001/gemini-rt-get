@@ -1,0 +1,18 @@
+{
+  "name": "gemini-rt-get",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "批量导入 Google 账号并提取 Antigravity refresh token",
+  "scripts": {
+    "start": "node src/server.js",
+    "smoke": "node scripts/smoke.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "playwright-core": "^1.55.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
