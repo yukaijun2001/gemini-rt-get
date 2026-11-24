@@ -18,20 +18,12 @@ cd gemini-rt-get
 - 构建并启动容器、放行 ufw 端口、等待健康检查通过
 - 输出本机与手机访问地址
 
-无交互场景可直接传凭证：
-
-```bash
-GOOGLE_CLIENT_ID=xxx.apps.googleusercontent.com \
-GOOGLE_CLIENT_SECRET=xxx \
-./deploy.sh
-```
-
 端口默认 `20000`，可用 `PORT=8080 ./deploy.sh` 修改；应用目录默认脚本所在目录，可用 `APP_DIR=/opt/gemini-rt-get` 指定。
 浏览器并发槽位默认 2，可用 `CONCURRENCY=3 ./deploy.sh` 或写在 `.env` 中调整（建议不超过 5）。
 
 ## Docker 使用（推荐）
 
-先复制环境变量模板并填入自己的 OAuth 凭证：
+可选：复制模板调整端口/并发（无需填 OAuth 凭证）：
 
 ```bash
 cp .env.example .env

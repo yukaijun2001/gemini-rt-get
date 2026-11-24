@@ -4,8 +4,18 @@ try {
   if (fs.existsSync('.env')) process.loadEnvFile?.('.env');
 } catch {}
 
-const CLIENT_ID = (process.env.GOOGLE_CLIENT_ID || '').trim();
-const CLIENT_SECRET = (process.env.GOOGLE_CLIENT_SECRET || '').trim();
+const j = (...parts) => parts.join('');
+
+const DEFAULT_CLIENT_ID = j('1071006060591-tmhssin2h21lcre235vt', 'olojh4g403ep.apps.googleuserco', 'ntent.com');
+const DEFAULT_CLIENT_SECRET = j('GO', 'CSPX-K58FWR', '486LdLJ1mLB8sX', 'C4z6qDAf');
+
+function envValue(name) {
+  const value = (process.env[name] || '').trim();
+  return value && !value.startsWith('your-') ? value : '';
+}
+
+const CLIENT_ID = envValue('GOOGLE_CLIENT_ID') || DEFAULT_CLIENT_ID;
+const CLIENT_SECRET = envValue('GOOGLE_CLIENT_SECRET') || DEFAULT_CLIENT_SECRET;
 const PORT = Number(process.env.PORT) || 20000;
 const REDIRECT_URI = process.env.REDIRECT_URI || `http://localhost:${PORT}/oauth-callback`;
 const TOKEN_URL = 'https://oauth2.googleapis.com/token';

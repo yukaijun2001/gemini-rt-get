@@ -120,23 +120,17 @@ fi
 
 ENV_FILE="$APP_DIR/.env"
 if [[ ! -f "$ENV_FILE" ]]; then
-  CLIENT_ID="${GOOGLE_CLIENT_ID:-}"
-  CLIENT_SECRET="${GOOGLE_CLIENT_SECRET:-}"
-  if [[ -t 0 ]]; then
-    [[ -n "$CLIENT_ID" ]] || read -r -p "Google OAuth Client ID: " CLIENT_ID
-    [[ -n "$CLIENT_SECRET" ]] || read -r -s -p "Google OAuth Client Secret: " CLIENT_SECRET && echo
-  fi
   cat > "$ENV_FILE" <<EOF
-GOOGLE_CLIENT_ID=${CLIENT_ID:-your-client-id.apps.googleusercontent.com}
-GOOGLE_CLIENT_SECRET=${CLIENT_SECRET:-your-client-secret}
 PORT=$PORT
 CONCURRENCY=${CONCURRENCY:-2}
 EOF
   chmod 600 "$ENV_FILE"
 fi
 
-if grep -qE '^GOOGLE_CLIENT_ID=(your-client-id.*)?$' "$ENV_FILE" || grep -qE '^GOOGLE_CLIENT_SECRET=(your-client-secret.*)?$' "$ENV_FILE"; then
-  warn "OAuth 凭证未配置，登录提取会失败。编辑 $ENV_FILE 后重新运行本脚本。"
+if [[ -n "${GOOGLE_CLIENT_ID:-}" && -n "${GOOGLE_CLIENT_SECRET:-}" ]]; then
+  sed -i.bak '/^GOOGLE_CLIENT_ID=/d; /^GOOGLE_CLIENT_SECRET=/d' "$ENV_FILE"
+  printf 'GOOGLE_CLIENT_ID=%s\nGOOGLE_CLIENT_SECRET=%s\n' "$GOOGLE_CLIENT_ID" "$GOOGLE_CLIENT_SECRET" >> "$ENV_FILE"
+  rm -f "$ENV_FILE.bak"
 fi
 
 if grep -qE '^PORT=' "$ENV_FILE"; then
