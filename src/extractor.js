@@ -23,7 +23,11 @@ const SELECTORS = {
   passwordNext: ['#passwordNext', 'button:has-text("下一步")', 'button:has-text("Next")'],
   otherWay: [
     'button:has-text("尝试其他方式")',
+    'button:has-text("试试其他方式")',
     'button:has-text("Try another way")',
+    'a:has-text("试试其他方式")',
+    'a:has-text("尝试其他方式")',
+    '[role="button"]:has-text("试试其他方式")',
     '[role="button"]:has-text("尝试其他方式")',
     '[role="button"]:has-text("Try another way")'
   ],
@@ -32,6 +36,8 @@ const SELECTORS = {
     'li:has-text("身份验证器")',
     'div[role="link"]:has-text("身份验证器")',
     '[role="button"]:has-text("身份验证器")',
+    '[role="button"]:has-text("验证器")',
+    'li:has-text("验证器")',
     'li:has-text("Authenticator")',
     'div[role="link"]:has-text("Authenticator")',
     '[role="button"]:has-text("Authenticator")'
