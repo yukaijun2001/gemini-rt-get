@@ -25,11 +25,17 @@ const SELECTORS = {
     'button:has-text("尝试其他方式")',
     'button:has-text("试试其他方式")',
     'button:has-text("Try another way")',
+    'button:has-text("Coba cara lain")',
+    'button:has-text("Otra forma de verificar")',
+    'button:has-text("Outra forma")',
+    'button:has-text("Другой способ")',
     'a:has-text("试试其他方式")',
     'a:has-text("尝试其他方式")',
+    'a:has-text("Try another way")',
     '[role="button"]:has-text("试试其他方式")',
     '[role="button"]:has-text("尝试其他方式")',
-    '[role="button"]:has-text("Try another way")'
+    '[role="button"]:has-text("Try another way")',
+    '[role="button"]:has-text("Coba cara lain")'
   ],
   authenticator: [
     '[data-challengetype="6"]',
@@ -40,7 +46,9 @@ const SELECTORS = {
     'li:has-text("验证器")',
     'li:has-text("Authenticator")',
     'div[role="link"]:has-text("Authenticator")',
-    '[role="button"]:has-text("Authenticator")'
+    '[role="button"]:has-text("Authenticator")',
+    'li:has-text("Aplikasi Authenticator")',
+    '[role="button"]:has-text("Aplikasi Authenticator")'
   ],
   totpInput: ['#totpPin', 'input[name="totpPin"]', 'input[type="tel"]', 'input[autocomplete="one-time-code"]'],
   totpNext: ['#totpNext', 'button:has-text("下一步")', 'button:has-text("Next")', 'button:has-text("验证")', 'button:has-text("Verify")'],
@@ -94,8 +102,9 @@ export async function extractRefreshToken(account, options) {
   const context = await chromium.launchPersistentContext(profileDir, {
     channel: 'chrome',
     headless: false,
-    locale: 'zh-CN',
+    locale: 'en-US',
     timezoneId: 'Asia/Shanghai',
+    extraHTTPHeaders: { 'Accept-Language': 'en-US,en;q=0.9' },
     viewport: WINDOW,
     ignoreDefaultArgs: ['--enable-automation'],
     args: [

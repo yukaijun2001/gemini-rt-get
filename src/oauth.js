@@ -34,6 +34,7 @@ export function buildAuthUrl(state) {
   const params = new URLSearchParams({
     access_type: 'offline',
     client_id: CLIENT_ID,
+    hl: 'en',
     prompt: 'consent',
     redirect_uri: REDIRECT_URI,
     response_type: 'code',
