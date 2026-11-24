@@ -27,6 +27,7 @@ GOOGLE_CLIENT_SECRET=xxx \
 ```
 
 端口默认 `20000`，可用 `PORT=8080 ./deploy.sh` 修改；应用目录默认脚本所在目录，可用 `APP_DIR=/opt/gemini-rt-get` 指定。
+浏览器并发槽位默认 2，可用 `CONCURRENCY=3 ./deploy.sh` 或写在 `.env` 中调整（建议不超过 5）。
 
 ## Docker 使用（推荐）
 
@@ -70,6 +71,8 @@ npm start
 
 2FA 密钥支持 Base32（空格可有可无）或 `otpauth://totp/...?secret=...` 链接。点「开始提取」后：
 
+- 每个槽位只放一个账号；点「+ 添加槽位」增加，任务按 `CONCURRENCY`（默认 2）并行执行，超出排队。
+- 某个槽位失败后可单独「重置」，不影响其他槽位。
 - 浏览器以有头模式启动后立即最小化（CDP `windowState: minimized`），每个账号单独 profile。
 - 自动填邮箱/密码，选择「身份验证器」，用本地算法生成 TOTP，完成同意页。
 - 捕获 `http://localhost:20000/oauth-callback` 的授权码，用 Antigravity client 兑换 RT。

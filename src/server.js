@@ -8,17 +8,21 @@ import { extractRefreshToken } from './extractor.js';
 
 const PORT = Number(process.env.PORT) || 20000;
 const HOST = process.env.HOST || '0.0.0.0';
+const CONCURRENCY = Math.max(1, Math.min(10, Number(process.env.CONCURRENCY) || 2));
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
 const RECORDINGS_DIR = path.join(ROOT, 'recordings');
 const PROFILES_DIR = path.join(ROOT, 'profiles');
+const DATA_DIR = path.join(ROOT, 'data');
+const JOBS_FILE = path.join(DATA_DIR, 'jobs.json');
 
 const jobs = new Map();
 const pendingCodes = new Map();
 const earlyCodes = new Map();
 const sseClients = new Set();
 const queue = [];
-let running = false;
+let activeCount = 0;
+let persistTimer = null;
 
 function detectUrls() {
   const urls = [];
@@ -49,9 +53,48 @@ function broadcast() {
   for (const res of sseClients) res.write(`data: ${payload}\n\n`);
 }
 
+async function persistJobs() {
+  const payload = JSON.stringify([...jobs.values()].map(publicJob).slice(-200), null, 2);
+  const tmp = `${JOBS_FILE}.tmp`;
+  await fs.mkdir(DATA_DIR, { recursive: true });
+  await fs.writeFile(tmp, payload, { mode: 0o600 });
+  await fs.rename(tmp, JOBS_FILE);
+}
+
+function persistSoon() {
+  clearTimeout(persistTimer);
+  persistTimer = setTimeout(() => {
+    persistJobs().catch(error => console.error('任务持久化失败:', error.message));
+  }, 300);
+}
+
 function update(job, patch) {
   Object.assign(job, patch);
   broadcast();
+  persistSoon();
+}
+
+async function loadJobs() {
+  try {
+    const list = JSON.parse(await fs.readFile(JOBS_FILE, 'utf8'));
+    if (!Array.isArray(list)) return;
+    for (const item of list) {
+      if (!item?.id || !item.email) continue;
+      const interrupted = item.status === 'running' || item.status === 'queued';
+      jobs.set(item.id, {
+        ...item,
+        password: '',
+        twofa: '',
+        state: '',
+        status: interrupted ? 'failed' : item.status,
+        stage: interrupted ? '已中断' : item.stage || '',
+        error: interrupted ? '服务重启，任务已中断，请重新提交' : item.error || null,
+        rt: item.rt || null,
+        finishedAt: interrupted ? Date.now() : item.finishedAt || null
+      });
+    }
+    if (jobs.size) persistSoon();
+  } catch {}
 }
 
 function parseLines(text) {
@@ -78,10 +121,18 @@ function enqueue(job) {
 }
 
 async function pump() {
-  if (running) return;
-  const job = queue.shift();
-  if (!job) return;
-  running = true;
+  while (activeCount < CONCURRENCY) {
+    const job = queue.shift();
+    if (!job) return;
+    activeCount += 1;
+    runJob(job).finally(() => {
+      activeCount -= 1;
+      pump();
+    });
+  }
+}
+
+async function runJob(job) {
   job.status = 'running';
   job.startedAt = Date.now();
   update(job, {});
@@ -120,9 +171,6 @@ async function pump() {
       error: error?.message || String(error),
       finishedAt: Date.now()
     });
-  } finally {
-    running = false;
-    pump();
   }
 }
 
@@ -147,7 +195,7 @@ app.get('/api/jobs', (_req, res) => {
 });
 
 app.get('/api/info', (_req, res) => {
-  res.json({ port: PORT, urls: detectUrls() });
+  res.json({ port: PORT, urls: detectUrls(), concurrency: CONCURRENCY });
 });
 
 app.get('/api/events', (req, res) => {
@@ -193,6 +241,7 @@ app.post('/api/jobs', (req, res) => {
   }
 
   broadcast();
+  persistSoon();
   pump();
   res.json({ ids });
 });
@@ -203,11 +252,33 @@ app.delete('/api/jobs', (_req, res) => {
   }
   queue.length = 0;
   broadcast();
+  persistSoon();
+  res.json({ ok: true });
+});
+
+app.delete('/api/jobs/:id', (req, res) => {
+  const job = jobs.get(req.params.id);
+  if (!job) {
+    res.status(404).json({ message: '任务不存在' });
+    return;
+  }
+  if (job.status === 'running') {
+    res.status(409).json({ message: '任务正在运行，完成后再重置' });
+    return;
+  }
+  const index = queue.indexOf(job);
+  if (index >= 0) queue.splice(index, 1);
+  earlyCodes.delete(job.state);
+  jobs.delete(job.id);
+  broadcast();
+  persistSoon();
   res.json({ ok: true });
 });
 
 await fs.mkdir(RECORDINGS_DIR, { recursive: true });
 await fs.mkdir(PROFILES_DIR, { recursive: true });
+await fs.mkdir(DATA_DIR, { recursive: true });
+await loadJobs();
 
 app.listen(PORT, HOST, () => {
   console.log(`gemini-rt-get 已启动: http://localhost:${PORT}`);

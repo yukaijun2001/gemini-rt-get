@@ -130,6 +130,7 @@ if [[ ! -f "$ENV_FILE" ]]; then
 GOOGLE_CLIENT_ID=${CLIENT_ID:-your-client-id.apps.googleusercontent.com}
 GOOGLE_CLIENT_SECRET=${CLIENT_SECRET:-your-client-secret}
 PORT=$PORT
+CONCURRENCY=${CONCURRENCY:-2}
 EOF
   chmod 600 "$ENV_FILE"
 fi
@@ -142,6 +143,10 @@ if grep -qE '^PORT=' "$ENV_FILE"; then
   sed -i.bak "s/^PORT=.*/PORT=$PORT/" "$ENV_FILE" && rm -f "$ENV_FILE.bak"
 else
   printf 'PORT=%s\n' "$PORT" >> "$ENV_FILE"
+fi
+
+if ! grep -qE '^CONCURRENCY=' "$ENV_FILE"; then
+  printf 'CONCURRENCY=%s\n' "${CONCURRENCY:-2}" >> "$ENV_FILE"
 fi
 
 IP="$(detect_ip)"

@@ -11,9 +11,11 @@ services:
       HOST_IP: "${HOST_IP:-}"
       GOOGLE_CLIENT_ID: "${GOOGLE_CLIENT_ID:-}"
       GOOGLE_CLIENT_SECRET: "${GOOGLE_CLIENT_SECRET:-}"
+      CONCURRENCY: "${CONCURRENCY:-2}"
     volumes:
       - ./profiles:/app/profiles
       - ./recordings:/app/recordings
+      - ./data:/app/data
     shm_size: "1gb"
     restart: unless-stopped
     healthcheck:

@@ -12,39 +12,54 @@
   <header>
     <div class="titles">
       <h1>Antigravity RT 提取</h1>
-      <p class="hint">每行一个账号：<code>邮箱----密码----2FA密钥</code>（支持 otpauth:// 链接）</p>
+      <p class="hint">每个槽位一个账号：<code>邮箱----密码----2FA密钥</code></p>
       <button id="addr" class="addr" title="点击复制访问地址">检测中…</button>
     </div>
     <div class="actions">
-      <button id="start" class="primary">开始提取</button>
+      <button id="startAll" class="primary">全部开始</button>
       <button id="clear">清空记录</button>
     </div>
   </header>
 
   <main>
-    <section class="panel">
-      <textarea id="input" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="a@example.com----password----JBSWY3DPEHPK3PXP"></textarea>
-      <div class="meta">
-        <span id="summary">等待输入</span>
-        <span>窗口自动最小化运行</span>
-      </div>
-    </section>
+    <div class="statusbar">
+      <span id="summary">等待输入</span>
+      <span id="live" class="live">待命</span>
+    </div>
 
-    <section id="cards" class="cards"></section>
+    <section id="slots" class="slots"></section>
+
+    <button id="addSlot" class="add-slot">+ 添加槽位</button>
+    <p class="foot-hint">一个槽位仅一个账号；关闭页面任务仍在后台继续。</p>
   </main>
 
-  <template id="card">
-    <article class="card">
-      <div class="card-head">
-        <span class="email"></span>
-        <span class="badge"></span>
+  <template id="slot">
+    <article class="slot">
+      <div class="slot-head">
+        <span class="slot-index">#1</span>
+        <span class="slot-email"></span>
+        <span class="badge">空闲</span>
       </div>
-      <p class="stage"></p>
-      <div class="rt-row">
+
+      <div class="slot-input">
+        <input class="line" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="邮箱----密码----2FA密钥" />
+        <button class="run primary">开始</button>
+        <button class="remove" title="删除槽位">×</button>
+      </div>
+
+      <p class="stage" hidden><span class="stage-text"></span><span class="elapsed"></span></p>
+      <div class="progress" hidden><span class="bar"></span></div>
+
+      <div class="rt-row" hidden>
         <input class="rt" readonly placeholder="refresh token" />
-        <button class="copy" hidden>复制</button>
+        <button class="copy">复制</button>
       </div>
+
       <p class="error" hidden></p>
+
+      <div class="slot-actions" hidden>
+        <button class="reset">重置</button>
+      </div>
     </article>
   </template>
 
