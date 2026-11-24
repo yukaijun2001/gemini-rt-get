@@ -2,6 +2,32 @@
 
 批量导入 Google 账号，自动完成 Antigravity OAuth 登录并提取 refresh token（RT）。
 
+## 一键部署
+
+```bash
+git clone https://github.com/yukaijun2001/gemini-rt-get.git
+cd gemini-rt-get
+./deploy.sh
+```
+
+脚本会依次完成：
+
+- 自动安装缺失的 git / curl / Docker（Linux 用官方脚本，macOS 需已装 Docker Desktop）
+- 拉取 `main` 最新代码（`git reset --hard origin/main`，本地改动会被覆盖）
+- 检测服务器局域网 IP，自动生成 `.env` 并注入端口和 IP
+- 构建并启动容器、放行 ufw 端口、等待健康检查通过
+- 输出本机与手机访问地址
+
+无交互场景可直接传凭证：
+
+```bash
+GOOGLE_CLIENT_ID=xxx.apps.googleusercontent.com \
+GOOGLE_CLIENT_SECRET=xxx \
+./deploy.sh
+```
+
+端口默认 `20000`，可用 `PORT=8080 ./deploy.sh` 修改；应用目录默认脚本所在目录，可用 `APP_DIR=/opt/gemini-rt-get` 指定。
+
 ## Docker 使用（推荐）
 
 先复制环境变量模板并填入自己的 OAuth 凭证：
